@@ -2,7 +2,7 @@ import streamlit as st
 import os
 path = os.path.dirname(__file__)
 
-from aws.main import get_files_from_noaa_bucket
+from aws.aws import get_files_from_noaa_bucket
 
 
 st.set_page_config(  # Alternate names: setup_page, page, layout

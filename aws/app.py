@@ -2,7 +2,7 @@ import streamlit as st
 import os
 path = os.path.dirname(__file__)
 
-from main import get_files_from_noaa_bucket
+from aws import get_files_from_noaa_bucket
 from sql import main_database_func_trigger, fetch_data_from_table
 
 main_database_func_trigger()
