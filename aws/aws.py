@@ -27,16 +27,16 @@ def get_files_from_noaa_bucket(dir):
     print(type(files))
     for file in files:
         files_from_bucket.append(file['Key'])
-        # f = open("output.txt", "a")
-        # print(file['Key'])
-        # # print(f"file_name: {file['Key']}, size: {file['Size']}",file = f)
+        f = open("output.txt", "a")
+        print(file['Key'])
+        print(f"file_name: {file['Key']}, size: {file['Size']}",file = f)
         # f.close()
     return files_from_bucket
 
 
 # get_all_files_in_s3_bucket(bucket_name)
 def main():
-    dir = "ABI-L1b-RadC/2022/209/00"
+    dir = "ABI-L1b-RadC/2022"
     get_files_from_noaa_bucket(dir)
     # get_all_files_in_s3_bucket(bucket_name,folder_name)
 
