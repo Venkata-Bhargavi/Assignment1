@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 from aws import get_files_from_noaa_bucket
 from sql import main_database_func_trigger, fetch_data_from_table
-from streamlit_lottie import st_lottie
+# from streamlit_lottie import st_lottie
 
 main_database_func_trigger()
 
@@ -77,14 +77,14 @@ with fetching:
             st.markdown("please select all fields")
 
     select_and_download_btn = st.button("select and download")
-with image:
-    lottie_hello = load_lottieurl("https://assets2.lottiefiles.com/private_files/lf30_rdkbjlef.json")
-    st_lottie(
-        lottie_hello,
-        speed=1,
-        reverse=False,
-        loop=True,
-        height="450px",
-        width=None,
-        key=None,
-    )
+# with image:
+#     lottie_hello = load_lottieurl("https://assets2.lottiefiles.com/private_files/lf30_rdkbjlef.json")
+#     st_lottie(
+#         lottie_hello,
+#         speed=1,
+#         reverse=False,
+#         loop=True,
+#         height="450px",
+#         width=None,
+#         key=None,
+#     )
