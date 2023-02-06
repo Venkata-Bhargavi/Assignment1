@@ -1,14 +1,17 @@
+import time
+
 import streamlit as st
 import os
 import json
 import requests
+from streamlit_lottie import st_lottie
+
 path = os.path.dirname(__file__)
 from dotenv import load_dotenv
 
 load_dotenv()
 from aws import get_files_from_noaa_bucket
 from sql import main_database_func_trigger, fetch_data_from_table
-# from streamlit_lottie import st_lottie
 
 main_database_func_trigger()
 
@@ -40,7 +43,6 @@ def load_lottieurl(url:str):
         return None
     return r.json()
 lottie_satellite = "https://assets3.lottiefiles.com/private_files/lf30_cmdcmgh0.json"
-st.header("Data Explorator")
 
 st.markdown("<h1 style='text-align: center'>Data Explorator</h1>",unsafe_allow_html=True)
 st.markdown("<h2 style='text-align: center'>GEOS</h2>",unsafe_allow_html=True)
@@ -50,41 +52,65 @@ selected_hour_geos = ""
 year,day,hour = st.columns([1,1,1])
 
 with year:
-    year = st.selectbox('Year', options= data_df.year.unique().tolist())
+    yl = data_df.year.unique().tolist()
+    yl.insert(0, "Select Year")
+    year = st.selectbox('Year', yl)
     # year = st.selectbox('Year', range(2020, 2023))
     selected_year_geos = year
 days_of_selected_year = extract_values_from_df(data_df,"year",selected_year_geos,"day")
 with day:
-    day = st.selectbox('Day',days_of_selected_year.tolist())
+    dsyl = days_of_selected_year.tolist()
+    dsyl.insert(0, "Select Day")
+    day = st.selectbox('Day',dsyl)
     selected_day_geos = day
 hours_of_selected_day = extract_values_from_df(data_df,"day",selected_day_geos,"hour")
 with hour:
-    hour = st.selectbox("Hour",hours_of_selected_day.tolist())
+    hsdl = hours_of_selected_day.tolist()
+    hsdl.insert(0,"Select Hour")
+    hour = st.selectbox("Hour",hsdl)
     selected_hour_geos = hour
+def return_list(dir_to_check_geos):
+    noaa_files_list = []
 
-dir_to_check_geos = "ABI-L1b-RadC" + "/" + str(selected_year_geos) + "/" + str(selected_day_geos) + "/" + str(selected_hour_geos)
-print(dir_to_check_geos,"////////////////")
-fetching,image = st.columns([3,1])
-with fetching:
-    fetch_btn = st.button("Fetch Data")
-    not_empty_selection = all(map(bool, [selected_year_geos, selected_day_geos, selected_hour_geos]))
-    if fetch_btn:
-        if not_empty_selection:
-            dir = "ABI-L1b-RadC/2022/209/00"
-            files_list = get_files_from_noaa_bucket(dir_to_check_geos)
-            st.selectbox("Select an option", files_list)
-        else:
-            st.markdown("please select all fields")
+    noaa_files_list = get_files_from_noaa_bucket(dir_to_check_geos)
 
-    select_and_download_btn = st.button("select and download")
-# with image:
-#     lottie_hello = load_lottieurl("https://assets2.lottiefiles.com/private_files/lf30_rdkbjlef.json")
-#     st_lottie(
-#         lottie_hello,
-#         speed=1,
-#         reverse=False,
-#         loop=True,
-#         height="450px",
-#         width=None,
-#         key=None,
-#     )
+    return noaa_files_list
+
+
+# "st.session_state object:", st.session_state
+dir_to_check_geos = ""
+if (selected_hour_geos != "Select Hour") and (selected_day_geos != "Select Day") and (selected_year_geos != "Select Year"):
+    dir_to_check_geos = f"ABI-L1b-RadC/{selected_year_geos}/{selected_day_geos}/{selected_hour_geos}"
+# dir_to_check_geos = "ABI-L1b-RadC" + "/" + str(selected_year_geos) + "/" + str(selected_day_geos) + "/" + str( selected_hour_geos)
+st.markdown(dir_to_check_geos)
+
+
+fetching, image = st.columns([3, 1])
+# fetch_btn = 0
+# fetch_btn = 1 if st.button("Fetch Data") else 0
+
+# if selected_year_geos != "Select Year" :
+#     files_list = ["Select a file"]
+#     # st.selectbox("Select an option",files_list)
+#     not_empty_selection = all(map(bool, [selected_year_geos, selected_day_geos, selected_hour_geos])) #returns a bool on checking if all fields are empty
+#     # if fetch_btn:
+        # if not_empty_selection:
+# dir = "ABI-L1b-RadC/2022/209/00"
+# files_list.extend(noaa_files_list)
+# files_list = []
+noaa_files_list = return_list(dir_to_check_geos) if dir_to_check_geos != "" else []
+selected_file = st.selectbox("Select a file", noaa_files_list)
+
+
+    # select_and_download_btn = st.button("select and download")
+
+    # if select_and_download_btn:
+    #     st.markdown("")
+
+
+        # else:
+        #     fetch_btn = 0
+        #     st.markdown("please select all fields")
+
+# else:
+#     st.markdown("Select the details")
