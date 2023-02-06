@@ -84,8 +84,7 @@ if (selected_hour_geos != "Select Hour") and (selected_day_geos != "Select Day")
 # dir_to_check_geos = "ABI-L1b-RadC" + "/" + str(selected_year_geos) + "/" + str(selected_day_geos) + "/" + str( selected_hour_geos)
 st.markdown(dir_to_check_geos)
 
-l = return_list(dir_to_check_geos) if dir_to_check_geos != "" else []
-selected_file = st.selectbox("Select a file",l)
+
 fetching, image = st.columns([3, 1])
 # fetch_btn = 0
 # fetch_btn = 1 if st.button("Fetch Data") else 0
@@ -99,29 +98,16 @@ fetching, image = st.columns([3, 1])
 # dir = "ABI-L1b-RadC/2022/209/00"
 # files_list.extend(noaa_files_list)
 # files_list = []
-files_list = return_list(dir_to_check_geos)
-# selected_file = st.selectbox("Select a file", noaa_files_list)
-selected_file = st.multiselect(
-    "Select a file",
-    files_list)
-st.write('You selected:', selected_file)
+noaa_files_list = return_list(dir_to_check_geos) if dir_to_check_geos != "" else []
+selected_file = st.selectbox("Select a file", noaa_files_list)
+
 
     # select_and_download_btn = st.button("select and download")
 
     # if select_and_download_btn:
     #     st.markdown("")
 
-    # with image:
-    #     lottie_hello = load_lottieurl(f"{lottie_satellite}")
-    #     st_lottie(
-    #         lottie_hello,
-    #         speed=1,
-    #         reverse=False,
-    #         loop=True,
-    #         height="450px",
-    #         width=None,
-    #         key=None,
-    #     )
+
         # else:
         #     fetch_btn = 0
         #     st.markdown("please select all fields")
