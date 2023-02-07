@@ -3,6 +3,7 @@ import logging
 import sqlite3
 import pandas as pd
 from pathlib import Path
+from aws import get_meta_data_for_db_population
 
 LOGLEVEL  =  os.environ.get('LOGLEVEL','INFO').upper()
 
@@ -13,7 +14,7 @@ datefmt='%Y-%m-%d %H:%M:%S')
 
 
 
-database_file_name = "database.db"
+database_file_name = "meta.db"
 # ddl_file_name = ""
 database_file_path  = os.path.join(os.path.dirname(__file__),database_file_name)
 # ddl_file_path  = os.path.join(os.path.dirname(__file__),ddl_file_name)
@@ -21,17 +22,20 @@ database_file_path  = os.path.join(os.path.dirname(__file__),database_file_name)
 
 
 def create_df():
-    year = [2022] * 51 * 24 + [2023] * 32 * 24
-    days_with_leading_zeros = []
-    for i in range(1,33):
-        days_with_leading_zeros.append(str(i).zfill(3))
-    day = list(range(209, 260)) * 24 + days_with_leading_zeros * 24
-    first_ten_hours = []
-    for i in range(0,10):
-        first_ten_hours.append(str(i).zfill(2))
-    hour =  (first_ten_hours + list(range(10, 24))) * 83
-    data = {"year": year, "day": day, "hour": hour}
-    df = pd.DataFrame(data)
+    # year = [2022] * 51 * 24 + [2023] * 32 * 24
+    # days_with_leading_zeros = []
+    # for i in range(1,33):
+    #     days_with_leading_zeros.append(str(i).zfill(3))
+    # day = list(range(209, 260)) * 24 + days_with_leading_zeros * 24
+    # first_ten_hours = []
+    # for i in range(0,10):
+    #     first_ten_hours.append(str(i).zfill(2))
+    # hour =  (first_ten_hours + list(range(10, 24))) * 83
+    # data = {"year": year, "day": day, "hour": hour}
+    data = get_meta_data_for_db_population()
+    df = pd.DataFrame(data, columns = ['year', 'day', 'hour'])
+    df = df.reset_index(drop=True)
+    print("insidedf")
     return df
 
 def create_table_in_db():
@@ -67,7 +71,11 @@ def fetch_data_from_table():
     return df
 
 
-def main_database_func_trigger():
-    print("IN MAIN Func")
+# def main_database_func_trigger():
+#     print("IN MAIN Func")
+#     check_database_initilization()
+#     # create_df()
+#     # query_into_dataframe()
+
+if __name__ == "__main__":
     check_database_initilization()
-    # query_into_dataframe()
