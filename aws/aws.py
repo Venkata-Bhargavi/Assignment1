@@ -2,15 +2,12 @@ import os
 import boto3
 import logging
 
-import pandas as pd
 from dotenv import load_dotenv
 import re
-# import pandas as pd
 
-load_dotenv()  # to load environments from .env file
+load_dotenv() # to load environments from .env file
 
-# aws_s3_client = boto3.client('s3', region_name='us-east-1', aws_access_key_id=os.environ.get(
-#     'AWS_ACCESS_KEY'), aws_secret_access_key=os.environ.get('AWS_SECRET_KEY'))
+aws_s3_client = boto3.client('s3',region_name = 'us-east-1',aws_access_key_id = os.environ.get('AWS_ACCESS_KEY'),aws_secret_access_key = os.environ.get('AWS_SECRET_KEY'))
 
 # files_from_bucket = []
 
@@ -45,26 +42,24 @@ load_dotenv()  # to load environments from .env file
 Arguments : Directory of the bucket
 returns : list of all files from the dir
 """
-
-
 def get_files_from_noaa_bucket(dir):
     files_from_bucket = []
-    s3_client = boto3.client("s3", region_name='us-east-1', 
-                             aws_access_key_id=os.environ.get(
-                                 'AWS_ACCESS_KEY'),
-                             aws_secret_access_key=os.environ.get('AWS_SECRET_KEY'))
+    s3_client = boto3.client("s3",
+                      aws_access_key_id=os.environ.get('AWS_ACCESS_KEY'),
+                      aws_secret_access_key=os.environ.get('AWS_SECRET_KEY'))
     paginator = s3_client.get_paginator('list_objects_v2')
-    # ,PaginationConfig  = {"PageSize":2}
-    noaa_bucket = paginator.paginate(Bucket="noaa-goes18", Prefix=dir)
-    for count, page in enumerate(noaa_bucket):
+    noaa_bucket = paginator.paginate(Bucket = "noaa-goes18",Prefix = dir) #,PaginationConfig  = {"PageSize":2}
+    for count,page in enumerate(noaa_bucket):
         files = page.get("Contents")
         for file in files:
             files_from_bucket.append(file['Key'])
             # print(file['Key'])
             f = open("output.txt", "a")
-            print(f"{file['Key']}", file=f)
+            print(f"{file['Key']}",file = f)
     # print(files_from_bucket)
-    return files_from_bucket
+    return  files_from_bucket
+
+
 
 
 def get_meta_data_for_db_population():
@@ -72,13 +67,13 @@ def get_meta_data_for_db_population():
     files = get_files_from_noaa_bucket("ABI-L1b-RadC")
     for file in files:
         ydh = []
-        match = re.findall(r"(\d{4})(\d{3})(\d{2})", file)
+        match = re.findall(r"(\d{4})(\d{3})(\d{2})",file)
         # match = pattern.search(file)
         if match:
             year = match[0][0]
             month = match[0][1]
             day = match[0][2]
-            ydh.extend([year, month, day])
+            ydh.extend([year,month,day])
             if ydh not in meta_data_for_db:
                 meta_data_for_db.append(ydh)
     # print(meta_data_for_db,"-------------------------")
@@ -87,29 +82,52 @@ def get_meta_data_for_db_population():
     return meta_data_for_db
 
 
-# def main():
-#     # ydh = []
-#     # dir = "ABI-L1b-RadC/2022"
-#     # files = get_files_from_noaa_bucket()
-#     # pattern = re.findall(r'(\d{4})|(\d{3})|(\d{2})')
-#     # for file in files:
-#     #     match = re.findall(r"(\d{4})(\d{3})(\d{2})",file)
-#     #     # match = pattern.search(file)
-#     #     if match:
-#     #         year = match[0][0]
-#     #         month = match[0][1]
-#     #         day = match[0][2]
-#     #         ydh.append([])
-#     #         # station = match.group(4)
-#     #         # print(match[:3])
-#     #         f = open("output.txt", "a")
-#     #         print(f"{year},{month},{day}",file = f)
-#     #         # print(f"{match[:3]}",file = f)
-#     #         f.close()
+def get_noaa_geos_url(filename):
+    static_url_12 = "https://noaa-goes18.s3.amazonaws.com"
+    generated_url = f"{static_url_12}/{filename}"
+    return generated_url
+
+def get_my_s3_url(dir_to_geos,filename):
+    print(dir_to_geos)
+    print(filename)
+    static_url = "https://damg7245-ass1.s3.amazonaws.com"
+    filename_alone = filename.split("/")[-1]
+    generated_url = f"{static_url}/{dir_to_geos}/{filename_alone}"
+    return generated_url
+
+def copy_s3_file(src_bucket_name, src_file_name, dst_bucket_name, dst_file_name):
+    # s3 = boto3.client("s3",
+    #                   aws_access_key_id=os.environ.get('AWS_ACCESS_KEY'),
+    #                   aws_secret_access_key=os.environ.get('AWS_SECRET_KEY'))
+
+    # Creating Session With Boto3.
+    session = boto3.Session(
+        aws_access_key_id=os.environ.get('AWS_ACCESS_KEY'),
+        aws_secret_access_key=os.environ.get('AWS_SECRET_KEY')
+    )
+
+    # Creating S3 Resource From the Session.
+    s3 = session.resource('s3')
+
+    # Create a Soucre Dictionary That Specifies Bucket Name and Key Name of the Object to Be Copied
+    copy_source = {
+        'Bucket': src_bucket_name,
+        'Key': src_file_name
+    }
+
+    bucket = s3.Bucket(dst_bucket_name)
+
+    bucket.copy(copy_source, dst_file_name)
+
+    # Printing the Information That the File Is Copied.
+    print('Single File is copied')
+
+
 if __name__ == "__main__":
     # main()
 
     # get_files_from_noaa_bucket("ABI-L1b-RadC/2022")
-    meta_data = get_meta_data_for_db_population()
-    print(meta_data)
+    # meta_data = get_meta_data_for_db_population()
+    copy_s3_file("noaa-goes18","")
+    # print(meta_data)
     # piyush_func()
