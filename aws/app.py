@@ -10,10 +10,10 @@ path = os.path.dirname(__file__)
 from dotenv import load_dotenv
 
 load_dotenv()
-from aws import get_files_from_noaa_bucket
-from sql import main_database_func_trigger, fetch_data_from_table
+from aws import get_files_from_noaa_bucket, get_noaa_geos_url, copy_s3_file, get_my_s3_url
+from sql import check_database_initilization, fetch_data_from_table
 
-main_database_func_trigger()
+# check_database_initilization()
 
 data_df = fetch_data_from_table()
 
@@ -86,28 +86,31 @@ st.markdown(dir_to_check_geos)
 
 
 fetching, image = st.columns([3, 1])
-# fetch_btn = 0
-# fetch_btn = 1 if st.button("Fetch Data") else 0
 
-# if selected_year_geos != "Select Year" :
-#     files_list = ["Select a file"]
-#     # st.selectbox("Select an option",files_list)
 #     not_empty_selection = all(map(bool, [selected_year_geos, selected_day_geos, selected_hour_geos])) #returns a bool on checking if all fields are empty
-#     # if fetch_btn:
-        # if not_empty_selection:
-# dir = "ABI-L1b-RadC/2022/209/00"
-# files_list.extend(noaa_files_list)
-# files_list = []
+
 noaa_files_list = return_list(dir_to_check_geos) if dir_to_check_geos != "" else []
 selected_file = st.selectbox("Select a file", noaa_files_list)
 
+geos_file_url = get_noaa_geos_url(f"{dir_to_check_geos}/{selected_file}")
+get_url_btn = st.button("Get Url")
+my_s3_file_url = ""
+if get_url_btn:
+    src_bucket = "noaa-goes18"
+    des_bucket = "damg7245-ass1"
+    copy_s3_file(src_bucket,selected_file,des_bucket,selected_file)
+    my_s3_file_url = get_my_s3_url(dir_to_check_geos,selected_file)
+    st.markdown(f"{my_s3_file_url}")
+st.markdown(f"[Download]({my_s3_file_url})",unsafe_allow_html= True)
 
     # select_and_download_btn = st.button("select and download")
 
     # if select_and_download_btn:
     #     st.markdown("")
 
-
+# https://damg7245-ass1.s3.amazonaws.com/ABI-L1b-RadC/2023/001/00/OR_ABI-L1b-RadC-M6C01_G18_s20230010016170_e20230010018545_c20230010018590.nc
+#
+# https://damg7245-ass1.s3.amazonaws.com/ABI-L1b-RadC/2022/209/00/ABI-L1b-RadC/2022/209/00/OR_ABI-L1b-RadC-M6C01_G18_s20222090016140_e20222090018513_c20222090018546.nc
         # else:
         #     fetch_btn = 0
         #     st.markdown("please select all fields")
