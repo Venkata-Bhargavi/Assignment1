@@ -44,7 +44,7 @@ returns : list of all files from the dir
 """
 def get_files_from_noaa_bucket(dir):
     files_from_bucket = []
-    s3_client = boto3.client("s3",
+    s3_client = boto3.client("s3",region_name="us-east-1",
                       aws_access_key_id=os.environ.get('AWS_ACCESS_KEY'),
                       aws_secret_access_key=os.environ.get('AWS_SECRET_KEY'))
     paginator = s3_client.get_paginator('list_objects_v2')
