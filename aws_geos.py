@@ -131,7 +131,7 @@ def get_dir_from_filename_geos(file_name):
   day_of_year = lis[3][5:8]
   day = lis[3][8:10]
   full_file_name = mode+"/"+year+"/"+day_of_year+"/"+day+"/"+file_name
-  print(full_file_name,"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+  # print(full_file_name,"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
   return full_file_name
 
 
