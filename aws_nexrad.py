@@ -35,10 +35,10 @@ def get_meta_data_for_db_population():
         # match = pattern.search(file)
         if match:
             year = match[0][0]
-            day = match[0][1]
-            hour = match[0][2]
+            month = match[0][1]
+            day = match[0][2]
             station = match[0][3]
-            ydhs.extend([year,day,hour,station])
+            ydhs.extend([year,month,day,station])
             if ydhs not in meta_data_for_db:
                 meta_data_for_db.append(ydhs)
     return meta_data_for_db
@@ -82,3 +82,13 @@ def copy_s3_nexrad_file(src_bucket_name, src_file_name, dst_bucket_name, dst_fil
 
     # Printing the Information That the File Is Copied.
     print('Single File is copied')
+    
+    
+if __name__ == "__main__":
+    # main()
+
+    # get_files_from_noaa_bucket("ABI-L1b-RadC/2022")
+    # meta_data = get_meta_data_for_db_population()
+    copy_s3_nexrad_file("noaa-nexrad-level2","")
+    # print(meta_data)
+    # piyush_func()    
