@@ -15,9 +15,9 @@ load_dotenv()
 data_df = fetch_data_from_table()
 
 
-"""
-returns values from df of selected column
-"""
+# """
+# returns values from df of selected column
+# """
 
 def extract_values_from_df(df, key, value, col):
     # Extract the rows where key is equal to value
@@ -27,12 +27,14 @@ def extract_values_from_df(df, key, value, col):
     return filtered_df[col].values
 
 
-st.set_page_config(  # Alternate names: setup_page, page, layout
-    layout="wide",  # Can be "centered" or "wide". In the future also "dashboard", etc.
-    initial_sidebar_state="auto",  # Can be "auto", "expanded", "collapsed"
-    page_title='Venkata_Bhargavi_Sikhakolli',  # String or None. Strings get appended with "• Streamlit".
-    page_icon= None,  # String, anything supported by st.image, or None.
-)
+# st.set_page_config(  # Alternate names: setup_page, page, layout
+#     layout="wide",  # Can be "centered" or "wide". In the future also "dashboard", etc.
+#     initial_sidebar_state="auto",  # Can be "auto", "expanded", "collapsed"
+#     page_title='Venkata_Bhargavi_Sikhakolli',  # String or None. Strings get appended with "• Streamlit".
+#     page_icon= None,  # String, anything supported by st.image, or None.
+# )
+
+
 def load_lottiefile(filepath:str):
     with open(filepath,"r") as f:
         return json.load(f)
@@ -71,9 +73,9 @@ with hour:
     hour = st.selectbox("Hour",hsdl)
     selected_hour_geos = hour
 
-    """
-    takes geos dir as input and returns al the files in that dir as list
-    """
+    # """
+    # takes geos dir as input and returns al the files in that dir as list
+    # """
 def return_list(dir_to_check_geos):
     noaa_files_list = []
 
