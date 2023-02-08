@@ -71,14 +71,11 @@ def get_meta_data_for_db_population():
         # match = pattern.search(file)
         if match:
             year = match[0][0]
-            month = match[0][1]
-            day = match[0][2]
-            ydh.extend([year,month,day])
+            day = match[0][1]
+            hour = match[0][2]
+            ydh.extend([year,day,hour])
             if ydh not in meta_data_for_db:
                 meta_data_for_db.append(ydh)
-    # print(meta_data_for_db,"-------------------------")
-    # df = pd.DataFrame(meta_data_for_db, columns=['year', 'day', 'hour'])
-    # df.to_csv('sample.csv')
     return meta_data_for_db
 
 
