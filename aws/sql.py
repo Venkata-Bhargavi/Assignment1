@@ -3,7 +3,7 @@ import logging
 import sqlite3
 import pandas as pd
 from pathlib import Path
-from aws import get_meta_data_for_db_population
+from aws_geos import get_meta_data_for_db_population
 
 LOGLEVEL  =  os.environ.get('LOGLEVEL','INFO').upper()
 

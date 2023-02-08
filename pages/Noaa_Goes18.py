@@ -1,24 +1,23 @@
-import time
-
 import streamlit as st
 import os
 import json
 import requests
-from streamlit_lottie import st_lottie
+
+from aws.sql import fetch_data_from_table
+from aws_geos import get_files_from_noaa_bucket, get_noaa_geos_url, copy_s3_file, get_my_s3_url
 
 path = os.path.dirname(__file__)
 from dotenv import load_dotenv
 
 load_dotenv()
-from aws import get_files_from_noaa_bucket, get_noaa_geos_url, copy_s3_file, get_my_s3_url
-from sql import check_database_initilization, fetch_data_from_table
 
-# check_database_initilization()
 
 data_df = fetch_data_from_table()
 
-# print(data_df)
 
+"""
+returns values from df of selected column
+"""
 
 def extract_values_from_df(df, key, value, col):
     # Extract the rows where key is equal to value
@@ -49,6 +48,8 @@ st.markdown("<h2 style='text-align: center'>GEOS</h2>",unsafe_allow_html=True)
 selected_year_geos = ""
 selected_day_geos = ""
 selected_hour_geos = ""
+
+#creating columns to show year, day, hour to user to select
 year,day,hour = st.columns([1,1,1])
 
 with year:
@@ -69,6 +70,10 @@ with hour:
     hsdl.insert(0,"Select Hour")
     hour = st.selectbox("Hour",hsdl)
     selected_hour_geos = hour
+
+    """
+    takes geos dir as input and returns al the files in that dir as list
+    """
 def return_list(dir_to_check_geos):
     noaa_files_list = []
 
@@ -76,12 +81,10 @@ def return_list(dir_to_check_geos):
 
     return noaa_files_list
 
-
-# "st.session_state object:", st.session_state
+#creating dir based on user input
 dir_to_check_geos = ""
 if (selected_hour_geos != "Select Hour") and (selected_day_geos != "Select Day") and (selected_year_geos != "Select Year"):
     dir_to_check_geos = f"ABI-L1b-RadC/{selected_year_geos}/{selected_day_geos}/{selected_hour_geos}"
-# dir_to_check_geos = "ABI-L1b-RadC" + "/" + str(selected_year_geos) + "/" + str(selected_day_geos) + "/" + str( selected_hour_geos)
 st.markdown(dir_to_check_geos)
 
 
@@ -89,31 +92,22 @@ fetching, image = st.columns([3, 1])
 
 #     not_empty_selection = all(map(bool, [selected_year_geos, selected_day_geos, selected_hour_geos])) #returns a bool on checking if all fields are empty
 
+#Takes list of files from user selected directory and showing them in selectbox
 noaa_files_list = return_list(dir_to_check_geos) if dir_to_check_geos != "" else []
 selected_file = st.selectbox("Select a file", noaa_files_list)
 
+
+
+#retrieving url from AWS s3 bucket for selected file
 geos_file_url = get_noaa_geos_url(f"{dir_to_check_geos}/{selected_file}")
 get_url_btn = st.button("Get Url")
 my_s3_file_url = ""
 if get_url_btn:
     src_bucket = "noaa-goes18"
     des_bucket = "damg7245-ass1"
+    #copying user selected file from AWS s3 bucket to our bucket
     copy_s3_file(src_bucket,selected_file,des_bucket,selected_file)
+    #getting url of user selected file from our s3 bucket
     my_s3_file_url = get_my_s3_url(dir_to_check_geos,selected_file)
     st.markdown(f"{my_s3_file_url}")
 st.markdown(f"[Download]({my_s3_file_url})",unsafe_allow_html= True)
-
-    # select_and_download_btn = st.button("select and download")
-
-    # if select_and_download_btn:
-    #     st.markdown("")
-
-# https://damg7245-ass1.s3.amazonaws.com/ABI-L1b-RadC/2023/001/00/OR_ABI-L1b-RadC-M6C01_G18_s20230010016170_e20230010018545_c20230010018590.nc
-#
-# https://damg7245-ass1.s3.amazonaws.com/ABI-L1b-RadC/2022/209/00/ABI-L1b-RadC/2022/209/00/OR_ABI-L1b-RadC-M6C01_G18_s20222090016140_e20222090018513_c20222090018546.nc
-        # else:
-        #     fetch_btn = 0
-        #     st.markdown("please select all fields")
-
-# else:
-#     st.markdown("Select the details")
