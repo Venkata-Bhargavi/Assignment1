@@ -2,9 +2,11 @@ import streamlit as st
 import os
 import json
 import requests
+from streamlit_lottie import st_lottie
 
 from sql import fetch_data_from_table
-from aws_geos import get_files_from_noaa_bucket, get_noaa_geos_url, copy_s3_file, get_my_s3_url
+from aws_geos import get_files_from_noaa_bucket, get_noaa_geos_url, copy_s3_file, get_my_s3_url, \
+    get_dir_from_filename_geos
 
 path = os.path.dirname(__file__)
 from dotenv import load_dotenv
@@ -24,7 +26,7 @@ def extract_values_from_df(df, key, value, col):
     filtered_df = df[df[key] == value]
 
     # Return all the values from the specified column
-    return filtered_df[col].values
+    return filtered_df[col].unique().tolist()
 
 
 # st.set_page_config(  # Alternate names: setup_page, page, layout
@@ -45,6 +47,17 @@ def load_lottieurl(url:str):
     return r.json()
 lottie_satellite = "https://assets3.lottiefiles.com/private_files/lf30_cmdcmgh0.json"
 
+with st.sidebar:
+    lottie_pro = load_lottieurl(f"{lottie_satellite}")
+    st_lottie(
+        lottie_pro,
+        speed=1,
+        reverse=False,
+        loop=True,
+        height="450px",
+        width=None,
+        key=None,
+    )
 st.markdown("<h1 style='text-align: center'>Data Explorator</h1>",unsafe_allow_html=True)
 st.markdown("<h2 style='text-align: center'>GEOS</h2>",unsafe_allow_html=True)
 selected_year_geos = ""
@@ -62,13 +75,13 @@ with year:
     selected_year_geos = year
 days_of_selected_year = extract_values_from_df(data_df,"year",selected_year_geos,"day")
 with day:
-    dsyl = days_of_selected_year.tolist()
+    dsyl = days_of_selected_year
     dsyl.insert(0, "Select Day")
     day = st.selectbox('Day',dsyl)
     selected_day_geos = day
 hours_of_selected_day = extract_values_from_df(data_df,"day",selected_day_geos,"hour")
 with hour:
-    hsdl = hours_of_selected_day.tolist()
+    hsdl = hours_of_selected_day
     hsdl.insert(0,"Select Hour")
     hour = st.selectbox("Hour",hsdl)
     selected_hour_geos = hour
@@ -108,8 +121,34 @@ if get_url_btn:
     src_bucket = "noaa-goes18"
     des_bucket = "damg7245-ass1"
     #copying user selected file from AWS s3 bucket to our bucket
+    # st.markdown(f"selected file {selected_file}")
     copy_s3_file(src_bucket,selected_file,des_bucket,selected_file)
     #getting url of user selected file from our s3 bucket
-    my_s3_file_url = get_my_s3_url(dir_to_check_geos,selected_file)
-    st.markdown(f"{my_s3_file_url}")
-st.markdown(f"[Download]({my_s3_file_url})",unsafe_allow_html= True)
+    my_s3_file_url = get_my_s3_url(selected_file)
+    # st.markdown(f"{my_s3_file_url}")
+with st.expander("Expand for URL"):
+    text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
+    st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
+# st.markdown(f"[Download]({my_s3_file_url})",unsafe_allow_html= True)
+
+st.markdown("----------------------------------------------------------------------------------------------------")
+st.markdown("<h2 style='text-align: center'>Download Using FileName</h2>",unsafe_allow_html=True)
+given_file_name = st.text_input("Enter File Name")
+button_url = st.button("Get url")
+
+if button_url:
+
+    src_bucket = "noaa-goes18"
+    des_bucket = "damg7245-ass1"
+    # copying user selected file from AWS s3 bucket to our bucket
+    full_file_name = get_dir_from_filename_geos(given_file_name)
+    # st.markdown(f"full file name is {full_file_name}")
+    copy_s3_file(src_bucket, full_file_name, des_bucket, full_file_name)
+    # getting url of user selected file from our s3 bucket
+    dir_to_check = f"ABI-L1b-RadC/{selected_year_geos}/{selected_day_geos}/{selected_hour_geos}"
+    my_s3_file_url = get_my_s3_url( full_file_name)
+    # displaying url through expander
+    with st.expander("Expand for URL"):
+        text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
+        st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
+

@@ -54,14 +54,16 @@ def get_files_from_noaa_bucket(dir):
         for file in files:
             files_from_bucket.append(file['Key'])
             # print(file['Key'])
-            f = open("output.txt", "a")
-            print(f"{file['Key']}",file = f)
+            # f = open("output.txt", "a")
+            # print(f"{file['Key']}",file = f)
     # print(files_from_bucket)
     return  files_from_bucket
 
 
 
-
+"""
+takes file name and matches regex to get year,day and hour details of each file and returns list of [year,day,hour]
+"""
 def get_meta_data_for_db_population():
     meta_data_for_db = []
     files = get_files_from_noaa_bucket("ABI-L1b-RadC")
@@ -84,12 +86,12 @@ def get_noaa_geos_url(filename):
     generated_url = f"{static_url_12}/{filename}"
     return generated_url
 
-def get_my_s3_url(dir_to_geos,filename):
-    print(dir_to_geos)
+def get_my_s3_url(filename):
+    # print(dir_to_geos)
     print(filename)
     static_url = "https://damg7245-ass1.s3.amazonaws.com"
     filename_alone = filename.split("/")[-1]
-    generated_url = f"{static_url}/{dir_to_geos}/{filename_alone}"
+    generated_url = f"{static_url}/{filename}"
     return generated_url
 
 def copy_s3_file(src_bucket_name, src_file_name, dst_bucket_name, dst_file_name):
@@ -118,6 +120,21 @@ def copy_s3_file(src_bucket_name, src_file_name, dst_bucket_name, dst_file_name)
 
     # Printing the Information That the File Is Copied.
     print('Single File is copied')
+
+def get_dir_from_filename_geos(file_name):
+  # static_url_12 = "https://noaa-goes18.s3.amazonaws.com"
+  lis = file_name.split("_")
+  mode_lis = lis[1].split("-")
+  mode = "-".join(mode_lis[0:3])
+  file_text = lis[0]+"_"+lis[1]
+  year = lis[3][1:5]
+  day_of_year = lis[3][5:8]
+  day = lis[3][8:10]
+  full_file_name = mode+"/"+year+"/"+day_of_year+"/"+day+"/"+file_name
+  # print(full_file_name,"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+  return full_file_name
+
+
 
 
 if __name__ == "__main__":
