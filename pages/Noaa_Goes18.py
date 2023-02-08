@@ -3,7 +3,7 @@ import os
 import json
 import requests
 
-from aws.sql import fetch_data_from_table
+from sql import fetch_data_from_table
 from aws_geos import get_files_from_noaa_bucket, get_noaa_geos_url, copy_s3_file, get_my_s3_url
 
 path = os.path.dirname(__file__)
