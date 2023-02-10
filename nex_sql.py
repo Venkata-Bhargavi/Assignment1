@@ -149,5 +149,5 @@ def fetch_data_from_table():
 #         logging.info("Database file already exist")
 #         create_table_in_db()
 
-if __name__ == "__main__":
-    check_database_initilization()
+# if __name__ == "__main__":
+#     check_database_initilization()
