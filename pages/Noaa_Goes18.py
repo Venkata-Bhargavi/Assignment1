@@ -5,7 +5,8 @@ import requests
 from streamlit_lottie import st_lottie
 
 from sql import fetch_data_from_table
-from aws_geos import get_files_from_noaa_bucket, get_noaa_geos_url, copy_s3_file, get_my_s3_url, get_dir_from_filename_geos
+from aws_geos import get_files_from_noaa_bucket, get_noaa_geos_url, copy_s3_file, get_my_s3_url, \
+    get_dir_from_filename_geos
 
 path = os.path.dirname(__file__)
 from dotenv import load_dotenv
@@ -26,14 +27,6 @@ def extract_values_from_df(df, key, value, col):
 
     # Return all the values from the specified column
     return filtered_df[col].unique().tolist()
-
-
-# st.set_page_config(  # Alternate names: setup_page, page, layout
-#     layout="wide",  # Can be "centered" or "wide". In the future also "dashboard", etc.
-#     initial_sidebar_state="auto",  # Can be "auto", "expanded", "collapsed"
-#     page_title='Venkata_Bhargavi_Sikhakolli',  # String or None. Strings get appended with "• Streamlit".
-#     page_icon= None,  # String, anything supported by st.image, or None.
-# )
 
 
 def load_lottiefile(filepath:str):
@@ -116,19 +109,24 @@ selected_file = st.selectbox("Select a file", noaa_files_list)
 geos_file_url = get_noaa_geos_url(f"{dir_to_check_geos}/{selected_file}")
 get_url_btn = st.button("Get Url")
 my_s3_file_url = ""
+# empty_selection = all(map(bool, [selected_year_geos, selected_day_geos, selected_hour_geos])) #returns a bool on checking if all fields are empty
+
 if get_url_btn:
-    src_bucket = "noaa-goes18"
-    des_bucket = "damg7245-ass1"
-    #copying user selected file from AWS s3 bucket to our bucket
-    # st.markdown(f"selected file {selected_file}")
-    copy_s3_file(src_bucket,selected_file,des_bucket,selected_file)
-    #getting url of user selected file from our s3 bucket
-    my_s3_file_url = get_my_s3_url(selected_file)
-    # st.markdown(f"{my_s3_file_url}")
-with st.expander("Expand for URL"):
-    text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
-    st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
-# st.markdown(f"[Download]({my_s3_file_url})",unsafe_allow_html= True)
+    if ((selected_hour_geos != "Select Hour") and (selected_day_geos != "Select Day") and (selected_year_geos != "Select Year")):
+        src_bucket = "noaa-goes18"
+        des_bucket = "damg7245-ass1"
+        # copying user selected file from AWS s3 bucket to our bucket
+        copy_s3_file(src_bucket, selected_file, des_bucket, selected_file)
+        # getting url of user selected file from our s3 bucket
+        my_s3_file_url = get_my_s3_url(selected_file)
+        with st.expander("Expand for URL"):
+            text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
+            st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
+    else:
+        st.markdown("Please select all fields!")
+
+
+
 
 st.markdown("----------------------------------------------------------------------------------------------------")
 st.markdown("<h2 style='text-align: center'>Download Using FileName</h2>",unsafe_allow_html=True)
@@ -136,18 +134,27 @@ given_file_name = st.text_input("Enter File Name")
 button_url = st.button("Get url")
 
 if button_url:
+    if given_file_name != "":
+        src_bucket = "noaa-goes18"
+        des_bucket = "damg7245-ass1"
+        # copying user selected file from AWS s3 bucket to our bucket
+        full_file_name = get_dir_from_filename_geos(given_file_name)
+        # st.markdown(f"full file name is {full_file_name}")
+        if full_file_name != "":
+            copied_flag = copy_s3_file(src_bucket, full_file_name, des_bucket, full_file_name)
+            # getting url of user selected file from our s3 bucket
+            dir_to_check = f"ABI-L1b-RadC/{selected_year_geos}/{selected_day_geos}/{selected_hour_geos}"
+            if copied_flag:
+                my_s3_file_url = get_my_s3_url( full_file_name)
+                # displaying url through expander
+                with st.expander("Expand for URL"):
+                    text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
+                    st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
+            else:
+                st.error("File not found in NOAA database, Please enter a valid filename!")
 
-    src_bucket = "noaa-goes18"
-    des_bucket = "damg7245-ass1"
-    # copying user selected file from AWS s3 bucket to our bucket
-    full_file_name = get_dir_from_filename_geos(given_file_name)
-    # st.markdown(f"full file name is {full_file_name}")
-    copy_s3_file(src_bucket, full_file_name, des_bucket, full_file_name)
-    # getting url of user selected file from our s3 bucket
-    dir_to_check = f"ABI-L1b-RadC/{selected_year_geos}/{selected_day_geos}/{selected_hour_geos}"
-    my_s3_file_url = get_my_s3_url( full_file_name)
-    # displaying url through expander
-    with st.expander("Expand for URL"):
-        text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
-        st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
+        else:
+            st.error("File not found in NOAA database, Please enter a valid filename")
+    else:
+        st.error("Please Enter a file name")
 

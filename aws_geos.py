@@ -2,6 +2,8 @@ import os
 import boto3
 import logging
 
+import botocore
+import streamlit as st
 from dotenv import load_dotenv
 import re
 
@@ -104,34 +106,80 @@ def copy_s3_file(src_bucket_name, src_file_name, dst_bucket_name, dst_file_name)
         aws_access_key_id=os.environ.get('AWS_ACCESS_KEY'),
         aws_secret_access_key=os.environ.get('AWS_SECRET_KEY')
     )
+    flag = 0
 
-    # Creating S3 Resource From the Session.
     s3 = session.resource('s3')
+    src_bucket = s3.Bucket(src_bucket_name)
 
-    # Create a Soucre Dictionary That Specifies Bucket Name and Key Name of the Object to Be Copied
+    try:
+        src_bucket.Object(src_file_name).load()
+        flag = 1
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            st.error(f"File {src_file_name} not found in source bucket {src_bucket_name}.")
+            flag = 0
+            # return
+        # else:
+        #     raise
+
     copy_source = {
         'Bucket': src_bucket_name,
         'Key': src_file_name
     }
+    dst_bucket = s3.Bucket(dst_bucket_name)
+    if flag:
+        try:
+            dst_bucket.Object(dst_file_name).load()
+            # print(f"Object {dst_file_name} already exists in destination bucket {dst_bucket_name}.")
+            flag = 1
+        except botocore.exceptions.ClientError as e:
+            if e.response['Error']['Code'] == "404" and flag:
+                dst_bucket.copy(copy_source, dst_file_name)
+                # print(f"Object {src_file_name} copied from source bucket {src_bucket_name} to destination bucket {dst_bucket_name}.")
+                flag = 1
+            else:
+                st.error("No Such File")
+                flag = 0
+    return flag
 
-    bucket = s3.Bucket(dst_bucket_name)
+    # # Creating S3 Resource From the Session.
+    # s3 = session.resource('s3')
+    #
+    # # Create a Soucre Dictionary That Specifies Bucket Name and Key Name of the Object to Be Copied
+    # copy_source = {
+    #     'Bucket': src_bucket_name,
+    #     'Key': src_file_name
+    # }
+    #
+    # bucket = s3.Bucket(dst_bucket_name)
+    #
+    # bucket.copy(copy_source, dst_file_name)
+    #
+    # # Printing the Information That the File Is Copied.
+    # # print('Single File is copied')
 
-    bucket.copy(copy_source, dst_file_name)
+"""
+takes just filename as input and extracts file directory from it and return the filename with dorectory
+"""
 
-    # Printing the Information That the File Is Copied.
-    print('Single File is copied')
 
 def get_dir_from_filename_geos(file_name):
   # static_url_12 = "https://noaa-goes18.s3.amazonaws.com"
-  lis = file_name.split("_")
-  mode_lis = lis[1].split("-")
-  mode = "-".join(mode_lis[0:3])
-  file_text = lis[0]+"_"+lis[1]
-  year = lis[3][1:5]
-  day_of_year = lis[3][5:8]
-  day = lis[3][8:10]
-  full_file_name = mode+"/"+year+"/"+day_of_year+"/"+day+"/"+file_name
-  # print(full_file_name,"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+  full_file_name = ""
+  try:
+      lis = file_name.split("_")
+      mode_lis = lis[1].split("-")
+      mode = "-".join(mode_lis[0:3])
+      if mode[-1].isdigit():
+          mode = mode[:len(mode)-1]
+      file_text = lis[0]+"_"+lis[1]
+      year = lis[3][1:5]
+      day_of_year = lis[3][5:8]
+      day = lis[3][8:10]
+      full_file_name = mode+"/"+year+"/"+day_of_year+"/"+day+"/"+file_name
+      # print(full_file_name,"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+  except:
+      print("exception_occured_in_goes")
   return full_file_name
 
 
