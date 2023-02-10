@@ -92,7 +92,7 @@ def return_list(dir_to_check_geos):
 dir_to_check_geos = ""
 if (selected_hour_geos != "Select Hour") and (selected_day_geos != "Select Day") and (selected_year_geos != "Select Year"):
     dir_to_check_geos = f"ABI-L1b-RadC/{selected_year_geos}/{selected_day_geos}/{selected_hour_geos}"
-st.markdown(dir_to_check_geos)
+# st.markdown(dir_to_check_geos)
 
 
 fetching, image = st.columns([3, 1])
@@ -119,11 +119,12 @@ if get_url_btn:
         copy_s3_file(src_bucket, selected_file, des_bucket, selected_file)
         # getting url of user selected file from our s3 bucket
         my_s3_file_url = get_my_s3_url(selected_file)
+        st.success(f"Download link has been generated!\n [URL]({my_s3_file_url})")
         with st.expander("Expand for URL"):
             text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
             st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
     else:
-        st.markdown("Please select all fields!")
+        st.error("Please select all fields!")
 
 
 
@@ -147,6 +148,7 @@ if button_url:
             if copied_flag:
                 my_s3_file_url = get_my_s3_url( full_file_name)
                 # displaying url through expander
+                st.success(f"Download link has been generated!\n [URL]({my_s3_file_url})")
                 with st.expander("Expand for URL"):
                     text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
                     st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
