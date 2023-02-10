@@ -67,7 +67,7 @@ def check_database_initilization():
 
 def fetch_data_from_table():
     conn = sqlite3.connect(database_file_path)
-    df = pd.read_sql('SELECT * FROM metadata', conn)
+    df = pd.read_sql('SELECT * FROM goes_meta', conn)
     return df
 
 

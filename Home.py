@@ -29,5 +29,13 @@ with st.sidebar:
         width=None,
         key=None,
     )
-st.markdown("Main Page")
-
+st.markdown("<h3 style='text-align: center'><span style='color: #2A76BE;'>Welcome to Data Exploration Application</span></h3>",unsafe_allow_html=True)
+st.markdown("<h5 style='text-align: center'>One stop to leverage data from NOAA Satellite and radars for analysis and extract insights.</h5>",unsafe_allow_html=True)
+st.markdown("")
+st.markdown("The 2 datasets available are: <span style='color: #2A76BE;'>GOES</span> and <span style='color: #2A76BE;'>NEXRAD</span> ",unsafe_allow_html=True)
+st.markdown("")
+st.markdown("")
+st.markdown("GOES (Geostationary Operational Environmental Satellite)These satellites assist meteorologists in observing and forecasting local weather phenomena such as thunderstorms, tornadoes, fog, hurricanes, flash floods, and other severe weather. GOES observations have also been useful in monitoring dust storms, volcanic eruptions, and forest fires.")
+st.markdown("")
+st.markdown("")
+st.markdown("NEXRAD (Next Generation Radar)NEXRAD detects precipitation and atmospheric movement or wind. It returns data which when processed can be displayed in a mosaic map which shows patterns of precipitation and its movement. The radar system operates in two basic modes, selectable by the operator – a slow-scanning clear-air mode for analyzing air movements when there is little or no activity in the area, and a precipitation mode, with a faster scan for tracking active weather.")

@@ -61,29 +61,42 @@ selected_station_nexrad = ""
 
 #creating columns to show year, day, hour to user to select
 year, month, day, station_code = st.columns([1, 1, 1, 1])
+
 data_df = fetch_data_from_table()
 
 with year:
     yl = data_df.year.unique().tolist()
+    # yl = [int(item) for item in yl]
+    # yl.sort()
+    # yl = [str(item) for item in yl]
     yl.insert(0, "Select Year")
     year = st.selectbox('Year', yl)
     # year = st.selectbox('Year', range(2020, 2023))
     selected_year_nexrad = year
-days_of_selected_year = extract_values_from_df(data_df,"year", selected_year_nexrad, "month")
+month_of_selected_year = extract_values_from_df(data_df, "year", selected_year_nexrad, "month")
 with month:
-    dsyl = days_of_selected_year
-    dsyl.insert(0, "Select Day")
-    month = st.selectbox('Month', dsyl)
+    msyl = month_of_selected_year
+    # msyl = [int(item) for item in msyl]
+    # msyl.sort()
+    # msyl=[str(item) for item in msyl]
+    msyl.insert(0, "Select Month")
+    month = st.selectbox('Month', msyl)
     selected_month_nexrad = month
-hours_of_selected_day = extract_values_from_df(data_df,"month", selected_month_nexrad, "day")
+day_of_selected_month = extract_values_from_df(data_df, "month", selected_month_nexrad, "day")
 with day:
-    hsdl = hours_of_selected_day
-    hsdl.insert(0,"Select Hour")
-    day = st.selectbox("Day", hsdl)
+    dsml = day_of_selected_month
+    # dsml = [int(item) for item in dsml]
+    # dsml.sort()
+    # dsml = [str(item) for item in dsml]
+    dsml.insert(0, "Select Day")
+    day = st.selectbox("Day", dsml)
     selected_day_nexrad = day
 station_code_of_selected_hour = extract_values_from_df(data_df,"day", selected_day_nexrad, "station")
 with station_code:
     scshl = station_code_of_selected_hour
+    # scshl = [int(item) for item in scshl]
+    # scshl.sort()
+    # scshl = [str(item) for item in scshl]
     scshl.insert(0,"Select station")
     station = st.selectbox("Station Code",scshl)
     selected_station_nexrad = station
@@ -101,7 +114,7 @@ def return_list(dir_to_check_geos):
 dir_to_check_nexrad = ""
 if (selected_day_nexrad != "Select Hour") and (selected_month_nexrad != "Select Day") and (selected_year_nexrad != "Select Year") and (selected_station_nexrad != "Select station"):
     dir_to_check_nexrad = f"{selected_year_nexrad}/{selected_month_nexrad}/{selected_day_nexrad}/{selected_station_nexrad}"
-st.markdown(dir_to_check_nexrad)
+# st.markdown(dir_to_check_nexrad)
 
 
 fetching, image = st.columns([3, 1])
