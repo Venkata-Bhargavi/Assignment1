@@ -1,10 +1,12 @@
+import pandas as pd
 import streamlit as st
 import os
 import json
 import requests
 from streamlit_lottie import st_lottie
 
-from sql import fetch_data_from_table
+from aws_nexrad import get_dir_from_filename_nexrad, get_files_from_nexrad_bucket, get_noaa_nexrad_url
+from nex_sql import fetch_data_from_table
 from aws_geos import get_files_from_noaa_bucket, get_noaa_geos_url, copy_s3_file, get_my_s3_url, \
     get_dir_from_filename_geos
 
@@ -51,48 +53,54 @@ with st.sidebar:
         key=None,
     )
 st.markdown("<h1 style='text-align: center'>Data Explorator</h1>",unsafe_allow_html=True)
-st.markdown("<h2 style='text-align: center'>GEOS</h2>",unsafe_allow_html=True)
-selected_year_geos = ""
-selected_day_geos = ""
-selected_hour_geos = ""
+st.markdown("<h2 style='text-align: center'>NEXRAD</h2>",unsafe_allow_html=True)
+selected_year_nexrad = ""
+selected_month_nexrad = ""
+selected_day_nexrad = ""
+selected_station_nexrad = ""
 
 #creating columns to show year, day, hour to user to select
-year,day,hour = st.columns([1,1,1])
+year, month, day, station_code = st.columns([1, 1, 1, 1])
 
 with year:
     yl = data_df.year.unique().tolist()
     yl.insert(0, "Select Year")
     year = st.selectbox('Year', yl)
     # year = st.selectbox('Year', range(2020, 2023))
-    selected_year_geos = year
-days_of_selected_year = extract_values_from_df(data_df,"year",selected_year_geos,"day")
-with day:
+    selected_year_nexrad = year
+days_of_selected_year = extract_values_from_df(data_df,"year", selected_year_nexrad, "month")
+with month:
     dsyl = days_of_selected_year
     dsyl.insert(0, "Select Day")
-    day = st.selectbox('Day',dsyl)
-    selected_day_geos = day
-hours_of_selected_day = extract_values_from_df(data_df,"day",selected_day_geos,"hour")
-with hour:
+    month = st.selectbox('Month', dsyl)
+    selected_month_nexrad = month
+hours_of_selected_day = extract_values_from_df(data_df,"month", selected_month_nexrad, "day")
+with day:
     hsdl = hours_of_selected_day
     hsdl.insert(0,"Select Hour")
-    hour = st.selectbox("Hour",hsdl)
-    selected_hour_geos = hour
-
+    day = st.selectbox("Day", hsdl)
+    selected_day_nexrad = day
+station_code_of_selected_hour = extract_values_from_df(data_df,"day", selected_day_nexrad, "station")
+with station_code:
+    scshl = station_code_of_selected_hour
+    scshl.insert(0,"Select station")
+    station = st.selectbox("Station Code",scshl)
+    selected_station_nexrad = station
     # """
     # takes geos dir as input and returns al the files in that dir as list
     # """
 def return_list(dir_to_check_geos):
     noaa_files_list = []
 
-    noaa_files_list = get_files_from_noaa_bucket(dir_to_check_geos)
+    noaa_files_list = get_files_from_nexrad_bucket(dir_to_check_geos)
 
     return noaa_files_list
 
 #creating dir based on user input
-dir_to_check_geos = ""
-if (selected_hour_geos != "Select Hour") and (selected_day_geos != "Select Day") and (selected_year_geos != "Select Year"):
-    dir_to_check_geos = f"ABI-L1b-RadC/{selected_year_geos}/{selected_day_geos}/{selected_hour_geos}"
-st.markdown(dir_to_check_geos)
+dir_to_check_nexrad = ""
+if (selected_day_nexrad != "Select Hour") and (selected_month_nexrad != "Select Day") and (selected_year_nexrad != "Select Year") and (selected_station_nexrad != "Select station"):
+    dir_to_check_nexrad = f"{selected_year_nexrad}/{selected_month_nexrad}/{selected_day_nexrad}/{selected_station_nexrad}"
+st.markdown(dir_to_check_nexrad)
 
 
 fetching, image = st.columns([3, 1])
@@ -100,20 +108,20 @@ fetching, image = st.columns([3, 1])
 #     not_empty_selection = all(map(bool, [selected_year_geos, selected_day_geos, selected_hour_geos])) #returns a bool on checking if all fields are empty
 
 #Takes list of files from user selected directory and showing them in selectbox
-noaa_files_list = return_list(dir_to_check_geos) if dir_to_check_geos != "" else []
+noaa_files_list = return_list(dir_to_check_nexrad) if dir_to_check_nexrad != "" else []
 selected_file = st.selectbox("Select a file", noaa_files_list)
 
 
 
 #retrieving url from AWS s3 bucket for selected file
-geos_file_url = get_noaa_geos_url(f"{dir_to_check_geos}/{selected_file}")
+geos_file_url = get_noaa_nexrad_url(f"{dir_to_check_nexrad}/{selected_file}")
 get_url_btn = st.button("Get Url")
 my_s3_file_url = ""
 # empty_selection = all(map(bool, [selected_year_geos, selected_day_geos, selected_hour_geos])) #returns a bool on checking if all fields are empty
 
 if get_url_btn:
-    if ((selected_hour_geos != "Select Hour") and (selected_day_geos != "Select Day") and (selected_year_geos != "Select Year")):
-        src_bucket = "noaa-goes18"
+    if ((selected_day_nexrad != "Select Hour") and (selected_month_nexrad != "Select Day") and (selected_year_nexrad != "Select Year")):
+        src_bucket = "noaa-nexrad-level2"
         des_bucket = "damg7245-ass1"
         # copying user selected file from AWS s3 bucket to our bucket
         copy_s3_file(src_bucket, selected_file, des_bucket, selected_file)
@@ -135,14 +143,14 @@ button_url = st.button("Get url")
 
 if button_url:
     if given_file_name != "":
-        src_bucket = "noaa-goes18"
+        src_bucket = "noaa-nexrad-level2"
         des_bucket = "damg7245-ass1"
         # copying user selected file from AWS s3 bucket to our bucket
-        full_file_name = get_dir_from_filename_geos(given_file_name)
+        full_file_name = get_dir_from_filename_nexrad(given_file_name)
         # st.markdown(f"full file name is {full_file_name}")
         copy_s3_file(src_bucket, full_file_name, des_bucket, full_file_name)
         # getting url of user selected file from our s3 bucket
-        dir_to_check = f"ABI-L1b-RadC/{selected_year_geos}/{selected_day_geos}/{selected_hour_geos}"
+        dir_to_check = f"{selected_year_nexrad}/{selected_month_nexrad}/{selected_day_nexrad}/{selected_station_nexrad}"
         my_s3_file_url = get_my_s3_url( full_file_name)
         # displaying url through expander
         with st.expander("Expand for URL"):
@@ -151,3 +159,14 @@ if button_url:
     else:
         st.markdown("Please Enter a file name")
 
+
+
+DATA_URL = ('nexrad1.csv')
+@st.cache(persist=True)
+def load_data(nrows):
+    data = pd.read_csv(DATA_URL, nrows=nrows)
+    # lowercase = lambda x:str(x).lower()
+    return data
+data = load_data(10000)
+df = pd.DataFrame({'lat': data['LAT'],'lon':data['LON']})
+st.map(df)
