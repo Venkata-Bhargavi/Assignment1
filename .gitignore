@@ -1,5 +1,4 @@
 .env
-# user defined
-venv_streamlit
-venv_run
-.txt
+/great-expectation/great_expectations/checkpoints/
+/great-expectation/great_expectations/plugins/
+/great-expectation/great_expectations/profilers/
