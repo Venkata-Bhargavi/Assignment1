@@ -43,7 +43,7 @@ def create_table_in_db():
     # Insert data to table here
 
     df = create_df()
-    df.to_sql("metadata", conn, if_exists = "replace")
+    df.to_sql("goes_meta", conn, if_exists = "replace")
     print(f"Data updated to table --> {df.shape}")
     # cursor.executescript(sql_script)
     conn.close()
@@ -67,7 +67,7 @@ def check_database_initilization():
 
 def fetch_data_from_table():
     conn = sqlite3.connect(database_file_path)
-    df = pd.read_sql('SELECT * FROM metadata', conn)
+    df = pd.read_sql('SELECT * FROM goes_meta', conn)
     return df
 
 
