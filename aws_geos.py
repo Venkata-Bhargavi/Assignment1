@@ -179,7 +179,7 @@ def get_dir_from_filename_geos(file_name):
       full_file_name = mode+"/"+year+"/"+day_of_year+"/"+day+"/"+file_name
       # print(full_file_name,"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
   except:
-      print("exception_occured_in_goes")
+      logging.debug("exception_occured_in_goes while making directory")
   return full_file_name
 
 

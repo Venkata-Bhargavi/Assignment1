@@ -125,6 +125,7 @@ database_file_path  = os.path.join(os.path.dirname(__file__),database_file_name)
 def fetch_data_from_table():
     conn = sqlite3.connect(database_file_path)
     df = pd.read_sql('SELECT * FROM nexrad', conn)
+    logging.info("Data Loaded")
     return df
 #
 # #     df = create_df()

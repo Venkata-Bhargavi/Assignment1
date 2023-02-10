@@ -1,3 +1,4 @@
+import logging
 import os
 import boto3
 import botocore
@@ -26,6 +27,7 @@ def get_files_from_nexrad_bucket(dir):
             # f = open("output1.txt", "a")?\
             # print(f"{file['Key']}",file = f)
     # print(files_from_nexrad_bucket)
+    logging.info("Files extracted from Nexrad bucket")
     return  files_from_nexrad_bucket
 #
 #
@@ -77,6 +79,7 @@ def get_files_from_nexrad_bucket(dir):
 def get_noaa_nexrad_url(filename):
     static_url_nex = "https://noaa-nexrad-level2.s3.amazonaws.com"
     generated_url = f"{static_url_nex}/{filename}"
+    # logging.info("Url extacted from S3")
     return generated_url
 
 def get_my_s3_url_nex(filename):
@@ -196,9 +199,11 @@ def copy_s3_nexrad_file(src_bucket_name, src_file_name, dst_bucket_name, dst_fil
         except botocore.exceptions.ClientError as e:
             if e.response['Error']['Code'] == "404" and flag:
                 dst_bucket.copy(copy_source, dst_file_name)
+                logging.info("File copied to your S3 bucket")
                 # print(f"Object {src_file_name} copied from source bucket {src_bucket_name} to destination bucket {dst_bucket_name}.")
                 flag = 1
             else:
+                logging.debug("File not found")
                 st.error("No Such File")
                 flag = 0
     return flag
