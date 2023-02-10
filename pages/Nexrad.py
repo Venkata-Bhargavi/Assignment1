@@ -149,7 +149,7 @@ if get_url_btn:
             st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
             logging.info("URL has been generated")
     else:
-        st.markdown("Please select all fields!")
+        st.error("Please select all fields!")
 
 
 
