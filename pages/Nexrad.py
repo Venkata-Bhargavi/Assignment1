@@ -135,7 +135,8 @@ my_s3_file_url = ""
 # empty_selection = all(map(bool, [selected_year_geos, selected_day_geos, selected_hour_geos])) #returns a bool on checking if all fields are empty
 
 if get_url_btn:
-    if ((selected_day_nexrad != "Select Hour") and (selected_month_nexrad != "Select Day") and (selected_year_nexrad != "Select Year")):
+    if((selected_year_nexrad != "Select Year") and (selected_month_nexrad != "Select Month") and (selected_day_nexrad != "Select Day") and (selected_year_nexrad != "Select Year")):
+    # if ((selected_day_nexrad != "Select Hour") and (selected_month_nexrad != "Select Day") and (selected_year_nexrad != "Select Year")):
         src_bucket = "noaa-nexrad-level2"
         des_bucket = "damg7245-ass1"
         # copying user selected file from AWS s3 bucket to our bucket
