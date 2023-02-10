@@ -1,3 +1,5 @@
+import logging
+
 import streamlit as st
 import os
 import json
@@ -123,6 +125,7 @@ if get_url_btn:
         with st.expander("Expand for URL"):
             text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
             st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
+            logging.info("URL has been generated")
     else:
         st.error("Please select all fields!")
 
@@ -152,7 +155,9 @@ if button_url:
                 with st.expander("Expand for URL"):
                     text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
                     st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
+                    logging.info("URL has been generated")
             else:
+                logging.DEBUG("File not found in NOAA database")
                 st.error("File not found in NOAA database, Please enter a valid filename!")
 
         else:

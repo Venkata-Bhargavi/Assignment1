@@ -4,6 +4,7 @@ import os
 import json
 import requests
 from streamlit_lottie import st_lottie
+import logging
 
 from aws_nexrad import get_files_from_nexrad_bucket, get_noaa_nexrad_url, copy_s3_nexrad_file, get_my_s3_url_nex, get_dir_from_filename_nexrad
 # from aws_nexrad import get_dir_from_filename_nexrad, get_files_from_nexrad_bucket, get_noaa_nexrad_url
@@ -145,6 +146,7 @@ if get_url_btn:
         with st.expander("Expand for URL"):
             text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
             st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
+            logging.info("URL has been generated")
     else:
         st.markdown("Please select all fields!")
 
@@ -174,11 +176,13 @@ if button_url:
         if copied_flag: #returns true if file copied
             my_s3_file_url = (f"https://damg7245-ass1.s3.amazonaws.com/{full_file_name}")
             st.success(f"Download link has been generated!\n [URL]({my_s3_file_url})")
+            logging.info("Download link generated")
 
             # displaying url through expander
             with st.expander("Expand for URL"):
                 text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
                 st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
+                logging.info("URL has been generated")
         else:
             st.error("File not found in NEXRAD Dataset, Please enter a valid filename")
 
