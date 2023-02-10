@@ -141,16 +141,20 @@ if button_url:
         full_file_name = get_dir_from_filename_geos(given_file_name)
         # st.markdown(f"full file name is {full_file_name}")
         if full_file_name != "":
-            copy_s3_file(src_bucket, full_file_name, des_bucket, full_file_name)
+            copied_flag = copy_s3_file(src_bucket, full_file_name, des_bucket, full_file_name)
             # getting url of user selected file from our s3 bucket
             dir_to_check = f"ABI-L1b-RadC/{selected_year_geos}/{selected_day_geos}/{selected_hour_geos}"
-            my_s3_file_url = get_my_s3_url( full_file_name)
-            # displaying url through expander
-            with st.expander("Expand for URL"):
-                text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
-                st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
+            if copied_flag:
+                my_s3_file_url = get_my_s3_url( full_file_name)
+                # displaying url through expander
+                with st.expander("Expand for URL"):
+                    text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
+                    st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
+            else:
+                st.error("File not found in NOAA database, Please enter a valid filename!")
+
         else:
             st.error("File not found in NOAA database, Please enter a valid filename")
     else:
-        st.markdown("Please Enter a file name")
+        st.error("Please Enter a file name")
 

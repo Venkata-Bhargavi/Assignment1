@@ -5,8 +5,7 @@ import json
 import requests
 from streamlit_lottie import st_lottie
 
-from aws_nexrad import get_files_from_nexrad_bucket, get_noaa_nexrad_url, copy_s3_nexrad_file, get_my_s3_url_nex, \
-    get_dir_from_filename_nexrad
+from aws_nexrad import get_files_from_nexrad_bucket, get_noaa_nexrad_url, copy_s3_nexrad_file, get_my_s3_url_nex, get_dir_from_filename_nexrad
 # from aws_nexrad import get_dir_from_filename_nexrad, get_files_from_nexrad_bucket, get_noaa_nexrad_url
 from nex_sql import fetch_data_from_table
 # from aws_geos import get_files_from_noaa_bucket, get_noaa_geos_url, copy_s3_file, get_my_s3_url, \
@@ -148,23 +147,27 @@ if button_url:
     if given_file_name != "":
         src_bucket = "noaa-nexrad-level2"
         des_bucket = "damg7245-ass1"
+
         # copying user selected file from AWS s3 bucket to our bucket
         full_file_name = get_dir_from_filename_nexrad(given_file_name)
-        st.markdown(full_file_name)
-        # if full_file_name != "":
-        flag = copy_s3_nexrad_file(src_bucket, full_file_name, des_bucket, full_file_name)
+
+        # copied_flag return true if file copied
+        copied_flag = copy_s3_nexrad_file(src_bucket, full_file_name, des_bucket, full_file_name)
+
         # getting url of user selected file from our s3 bucket
         dir_to_check = f"{selected_year_nexrad}/{selected_month_nexrad}/{selected_day_nexrad}/{selected_station_nexrad}"
-        # my_s3_file_url = get_my_s3_url_nex( full_file_name)
-        if flag:
+
+        # copied_flag returns true if file copied
+        if copied_flag: #returns true if file copied
             my_s3_file_url = (f"https://damg7245-ass1.s3.amazonaws.com/{full_file_name}")
-            # displaying url through expander
             st.success(f"Download link has been generated!\n [URL]({my_s3_file_url})")
+
+            # displaying url through expander
             with st.expander("Expand for URL"):
                 text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
                 st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
         else:
-            st.error("File not found in NEXRAD database, Please enter a valid filename")
+            st.error("File not found in NEXRAD Dataset, Please enter a valid filename")
 
     else:
         st.error("Please Enter a file name")
