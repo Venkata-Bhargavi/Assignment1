@@ -32,7 +32,7 @@ with st.sidebar:
 st.markdown("<h3 style='text-align: center'><span style='color: #2A76BE;'>Welcome to Data Exploration Application</span></h3>",unsafe_allow_html=True)
 st.markdown("<h5 style='text-align: center'>One stop to leverage data from NOAA Satellite and radars for analysis and extract insights.</h5>",unsafe_allow_html=True)
 st.markdown("")
-st.markdown("The 2 datasets available are: <span style='color: #2A76BE;'>[GOES](https://noaa-nexrad-level2.s3.amazonaws.com/index.html)</span> and <span style='color: #2A76BE;'>[NEXRAD](https://noaa-goes18.s3.amazonaws.com/index.html#ABI-L1b-RadC/)</span> ",unsafe_allow_html=True)
+st.markdown("The 2 datasets available are: <span style='color: #2A76BE;'>[GOES](https://noaa-goes18.s3.amazonaws.com/index.html#ABI-L1b-RadC/)</span> and <span style='color: #2A76BE;'>[NEXRAD](https://noaa-nexrad-level2.s3.amazonaws.com/index.html)</span> ",unsafe_allow_html=True)
 st.markdown("")
 st.markdown("")
 st.markdown("GOES (Geostationary Operational Environmental Satellite)These satellites assist meteorologists in observing and forecasting local weather phenomena such as thunderstorms, tornadoes, fog, hurricanes, flash floods, and other severe weather. GOES observations have also been useful in monitoring dust storms, volcanic eruptions, and forest fires.")
