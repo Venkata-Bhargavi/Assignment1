@@ -26,6 +26,14 @@ def get_files_from_nexrad_bucket(dir):
     # print(files_from_nexrad_bucket)
     return  files_from_nexrad_bucket
 
+
+def get_dir_from_filename_nexrad(file_name):
+    ground_station = file_name[0:4]
+    year = file_name[4:8]
+    month = file_name[8:10]
+    day = file_name[10:12]
+    full_file_name = year+"/"+month+"/"+day+"/"+ground_station+"/"+file_name
+    return full_file_name
 def get_meta_data_for_db_population():
     print("inside")
     meta_data_for_db = []
@@ -65,7 +73,7 @@ def get_meta_data_for_db_population():
 #     return meta_data_for_db
 
 def get_noaa_nexrad_url(filename):
-    static_url_nex = "https://noaa-nexrad-level2.s3.amazonaws.com/"
+    static_url_nex = "https://noaa-nexrad-level2.s3.amazonaws.com"
     generated_url = f"{static_url_nex}/{filename}"
     return generated_url
 
@@ -118,8 +126,9 @@ def get_dir_from_filename_geos(file_name):
     
 if __name__ == "__main__":
     # main()
-
-    # get_files_from_nexrad_bucket("2022/01/01")
+    x = get_meta_data_for_db_population()
+    print(x)
+    # get_files_from_nexrad_bucket("2022")
     # meta_data = get_meta_data_for_db_population()
     # copy_s3_nexrad_file("noaa-nexrad-level2","")
     
