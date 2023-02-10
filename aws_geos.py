@@ -1,7 +1,7 @@
 import os
 import boto3
 import logging
-
+import streamlit as st
 from dotenv import load_dotenv
 import re
 
@@ -128,17 +128,21 @@ takes just filename as input and extracts file directory from it and return the 
 
 def get_dir_from_filename_geos(file_name):
   # static_url_12 = "https://noaa-goes18.s3.amazonaws.com"
-  lis = file_name.split("_")
-  mode_lis = lis[1].split("-")
-  mode = "-".join(mode_lis[0:3])
-  if mode[-1].isdigit():
-      mode = mode[:len(mode)-1]
-  file_text = lis[0]+"_"+lis[1]
-  year = lis[3][1:5]
-  day_of_year = lis[3][5:8]
-  day = lis[3][8:10]
-  full_file_name = mode+"/"+year+"/"+day_of_year+"/"+day+"/"+file_name
-  # print(full_file_name,"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+  full_file_name = ""
+  try:
+      lis = file_name.split("_")
+      mode_lis = lis[1].split("-")
+      mode = "-".join(mode_lis[0:3])
+      if mode[-1].isdigit():
+          mode = mode[:len(mode)-1]
+      file_text = lis[0]+"_"+lis[1]
+      year = lis[3][1:5]
+      day_of_year = lis[3][5:8]
+      day = lis[3][8:10]
+      full_file_name = mode+"/"+year+"/"+day_of_year+"/"+day+"/"+file_name
+      print(full_file_name,"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+  except:
+      print("exception_occured_in_goes")
   return full_file_name
 
 

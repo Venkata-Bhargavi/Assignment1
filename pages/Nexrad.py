@@ -5,18 +5,20 @@ import json
 import requests
 from streamlit_lottie import st_lottie
 
-from aws_nexrad import get_dir_from_filename_nexrad, get_files_from_nexrad_bucket, get_noaa_nexrad_url
+from aws_nexrad import get_files_from_nexrad_bucket, get_noaa_nexrad_url, copy_s3_nexrad_file, get_my_s3_url_nex, \
+    get_dir_from_filename_nexrad
+# from aws_nexrad import get_dir_from_filename_nexrad, get_files_from_nexrad_bucket, get_noaa_nexrad_url
 from nex_sql import fetch_data_from_table
-from aws_geos import get_files_from_noaa_bucket, get_noaa_geos_url, copy_s3_file, get_my_s3_url, \
-    get_dir_from_filename_geos
+# from aws_geos import get_files_from_noaa_bucket, get_noaa_geos_url, copy_s3_file, get_my_s3_url, \
+#     get_dir_from_filename_geos
 
 path = os.path.dirname(__file__)
 from dotenv import load_dotenv
 
 load_dotenv()
 
-
-data_df = fetch_data_from_table()
+st.markdown("<h1 style='text-align: center'>Data Explorator</h1>",unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center'>NEXRAD</h2>",unsafe_allow_html=True)
 
 
 # """
@@ -52,8 +54,7 @@ with st.sidebar:
         width=None,
         key=None,
     )
-st.markdown("<h1 style='text-align: center'>Data Explorator</h1>",unsafe_allow_html=True)
-st.markdown("<h2 style='text-align: center'>NEXRAD</h2>",unsafe_allow_html=True)
+
 selected_year_nexrad = ""
 selected_month_nexrad = ""
 selected_day_nexrad = ""
@@ -61,6 +62,7 @@ selected_station_nexrad = ""
 
 #creating columns to show year, day, hour to user to select
 year, month, day, station_code = st.columns([1, 1, 1, 1])
+data_df = fetch_data_from_table()
 
 with year:
     yl = data_df.year.unique().tolist()
@@ -114,7 +116,7 @@ selected_file = st.selectbox("Select a file", noaa_files_list)
 
 
 #retrieving url from AWS s3 bucket for selected file
-geos_file_url = get_noaa_nexrad_url(f"{dir_to_check_nexrad}/{selected_file}")
+nexrad_file_url = get_noaa_nexrad_url(f"{dir_to_check_nexrad}/{selected_file}")
 get_url_btn = st.button("Get Url")
 my_s3_file_url = ""
 # empty_selection = all(map(bool, [selected_year_geos, selected_day_geos, selected_hour_geos])) #returns a bool on checking if all fields are empty
@@ -124,9 +126,10 @@ if get_url_btn:
         src_bucket = "noaa-nexrad-level2"
         des_bucket = "damg7245-ass1"
         # copying user selected file from AWS s3 bucket to our bucket
-        copy_s3_file(src_bucket, selected_file, des_bucket, selected_file)
+        copy_s3_nexrad_file(src_bucket, selected_file, des_bucket, selected_file)
         # getting url of user selected file from our s3 bucket
-        my_s3_file_url = get_my_s3_url(selected_file)
+        my_s3_file_url = get_my_s3_url_nex(selected_file)
+        st.success(f"Download link has been generated!\n [URL]({my_s3_file_url})")
         with st.expander("Expand for URL"):
             text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
             st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
@@ -147,17 +150,24 @@ if button_url:
         des_bucket = "damg7245-ass1"
         # copying user selected file from AWS s3 bucket to our bucket
         full_file_name = get_dir_from_filename_nexrad(given_file_name)
-        # st.markdown(f"full file name is {full_file_name}")
-        copy_s3_file(src_bucket, full_file_name, des_bucket, full_file_name)
+        st.markdown(full_file_name)
+        # if full_file_name != "":
+        flag = copy_s3_nexrad_file(src_bucket, full_file_name, des_bucket, full_file_name)
         # getting url of user selected file from our s3 bucket
         dir_to_check = f"{selected_year_nexrad}/{selected_month_nexrad}/{selected_day_nexrad}/{selected_station_nexrad}"
-        my_s3_file_url = get_my_s3_url( full_file_name)
-        # displaying url through expander
-        with st.expander("Expand for URL"):
-            text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
-            st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
+        # my_s3_file_url = get_my_s3_url_nex( full_file_name)
+        if flag:
+            my_s3_file_url = (f"https://damg7245-ass1.s3.amazonaws.com/{full_file_name}")
+            # displaying url through expander
+            st.success(f"Download link has been generated!\n [URL]({my_s3_file_url})")
+            with st.expander("Expand for URL"):
+                text2 = f"<p style='font-size: 20px; text-align: center'><span style='color: #15b090; font-weight:bold ;'>{my_s3_file_url}</span></p>"
+                st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
+        else:
+            st.error("File not found in NEXRAD database, Please enter a valid filename")
+
     else:
-        st.markdown("Please Enter a file name")
+        st.error("Please Enter a file name")
 
 
 
