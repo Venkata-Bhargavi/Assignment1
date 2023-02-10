@@ -56,7 +56,7 @@ def get_files_from_noaa_bucket(dir):
             # print(file['Key'])
             # f = open("output.txt", "a")
             # print(f"{file['Key']}",file = f)
-    # print(files_from_bucket)
+    print(files_from_bucket)
     return  files_from_bucket
 
 
@@ -78,6 +78,8 @@ def get_meta_data_for_db_population():
             ydh.extend([year,day,hour])
             if ydh not in meta_data_for_db:
                 meta_data_for_db.append(ydh)
+    
+    print(meta_data_for_db)
     return meta_data_for_db
 
 
@@ -140,8 +142,8 @@ def get_dir_from_filename_geos(file_name):
 if __name__ == "__main__":
     # main()
 
-    # get_files_from_noaa_bucket("ABI-L1b-RadC/2022")
+    # get_files_from_noaa_bucket("ABI-L1b-RadC/2022/258/10")
     # meta_data = get_meta_data_for_db_population()
-    copy_s3_file("noaa-goes18","")
+    # copy_s3_file("noaa-goes18","")
     # print(meta_data)
     # piyush_func()
