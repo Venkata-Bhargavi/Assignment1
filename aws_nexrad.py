@@ -1,5 +1,6 @@
 import os
 import boto3
+import botocore
 import streamlit as st
 # import logging
 #
@@ -80,64 +81,141 @@ def get_noaa_nexrad_url(filename):
 
 def get_my_s3_url_nex(filename):
     # print(dir_to_nex)
-    print(filename)
+    # print(filename)
     static_url = "https://damg7245-ass1.s3.amazonaws.com"
     filename_alone = filename.split("/")[-1]
     generated_url = f"{static_url}/{filename}"
     return generated_url
 
-def copy_s3_nexrad_file(src_bucket_name, src_file_name, dst_bucket_name, dst_file_name):
-    # s3 = boto3.client("s3",
-    #                   aws_access_key_id=os.environ.get('AWS_ACCESS_KEY'),
-    #                   aws_secret_access_key=os.environ.get('AWS_SECRET_KEY'))
+# def copy_s3_nexrad_file(src_bucket_name, src_file_name, dst_bucket_name, dst_file_name):
+#     # s3 = boto3.client("s3",
+#     #                   aws_access_key_id=os.environ.get('AWS_ACCESS_KEY'),
+#     #                   aws_secret_access_key=os.environ.get('AWS_SECRET_KEY'))
+#
+#     # Creating Session With Boto3.
+#     session = boto3.Session(
+#         aws_access_key_id=os.environ.get('AWS_ACCESS_KEY'),
+#         aws_secret_access_key=os.environ.get('AWS_SECRET_KEY')
+#     )
+#
+#      # Creating S3 Resource From the Session.
+#     s3 = session.resource('s3')
+#
+#     # Create a Soucre Dictionary That Specifies Bucket Name and Key Name of the Object to Be Copied
+#     copy_source = {
+#         'Bucket': src_bucket_name,
+#         'Key': src_file_name
+#     }
+#
+#     bucket = s3.Bucket(dst_bucket_name)
+#     flag = 0
+#     try:
+#         # bucket.copy(copy_source, dst_file_name)
+#         if not bucket.objects.filter(Prefix=dst_file_name).exists():
+#             bucket.copy(copy_source, dst_file_name)
+#             st.markdown(
+#                 f"Object {src_file_name} copied from source bucket {src_bucket_name} to destination bucket {dst_bucket_name}.")
+#         else:
+#             st.markdown(f"Object {dst_file_name} already exists in destination bucket {dst_bucket_name}.")
+#         flag = 1
+#     except:
+#         st.error("File not found in NEXRAD Database, Please check the file //////")
+#         flag = 0
+#
+#     # Printing the Information That the File Is Copied.
+#     print('Single File is copied')
+#
 
-    # Creating Session With Boto3.
+# def copy_s3_nexrad_file(src_bucket_name, src_file_name, dst_bucket_name, dst_file_name):
+#     session = boto3.Session(
+#         aws_access_key_id=os.environ.get('AWS_ACCESS_KEY'),
+#         aws_secret_access_key=os.environ.get('AWS_SECRET_KEY')
+#     )
+#
+#     s3 = session.resource('s3')
+#     src_bucket = s3.Bucket(src_bucket_name)
+#
+#     # Check if the file exists in the source bucket
+#     src_objects = list(src_bucket.objects.filter(Prefix=src_file_name))
+#     # st.markdown(src_objects)
+#
+#     if src_objects:
+#         copy_source = {
+#             'Bucket': src_bucket_name,
+#             'Key': src_file_name
+#         }
+#         dst_bucket = s3.Bucket(dst_bucket_name)
+#         # Check if the object already exists in the destination bucket
+#         dst_objects = list(dst_bucket.objects.filter(Prefix=dst_file_name))
+#         # st.markdown(dst_objects)
+#         if not dst_objects:
+#             dst_bucket.copy(copy_source, dst_file_name)
+#             st.markdown(f"Object {src_file_name} copied from source bucket {str.upper(src_bucket_name)} to destination bucket {dst_bucket_name}.")
+#         else:
+#             st.markdown(f"Object {dst_file_name} already exists in destination bucket {dst_bucket_name}.")
+#     else:
+#         st.markdown(f"File {src_file_name} not found in source bucket {src_bucket_name}.")
+
+
+import boto3
+import os
+
+def copy_s3_nexrad_file(src_bucket_name, src_file_name, dst_bucket_name, dst_file_name):
     session = boto3.Session(
         aws_access_key_id=os.environ.get('AWS_ACCESS_KEY'),
         aws_secret_access_key=os.environ.get('AWS_SECRET_KEY')
     )
-
-     # Creating S3 Resource From the Session.
+    flag = 0
     s3 = session.resource('s3')
+    src_bucket = s3.Bucket(src_bucket_name)
 
-    # Create a Soucre Dictionary That Specifies Bucket Name and Key Name of the Object to Be Copied
+    try:
+        src_bucket.Object(src_file_name).load()
+        flag = 1
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            # st.error(f"File {src_file_name} not found in source bucket {src_bucket_name}.")
+            flag = 0
+            # return
+        # else:
+        #     raise
+
     copy_source = {
         'Bucket': src_bucket_name,
         'Key': src_file_name
     }
+    dst_bucket = s3.Bucket(dst_bucket_name)
+    if flag:
+        try:
+            dst_bucket.Object(dst_file_name).load()
+            # print(f"Object {dst_file_name} already exists in destination bucket {dst_bucket_name}.")
+            flag = 1
+            # checks if the file name has .nc extension (a noaa goes extension) and should not copy if it has .nc in file
+            if(".nc" in dst_file_name):
+                flag = 0
+        except botocore.exceptions.ClientError as e:
+            if e.response['Error']['Code'] == "404" and flag:
+                dst_bucket.copy(copy_source, dst_file_name)
+                # print(f"Object {src_file_name} copied from source bucket {src_bucket_name} to destination bucket {dst_bucket_name}.")
+                flag = 1
+            else:
+                st.error("No Such File")
+                flag = 0
+    return flag
 
-    bucket = s3.Bucket(dst_bucket_name)
-    flag = 0
-    try:
-        # bucket.copy(copy_source, dst_file_name)
-        if not bucket.objects.filter(Prefix=dst_file_name).exists():
-            bucket.copy(copy_source, dst_file_name)
-            st.markdown(
-                f"Object {src_file_name} copied from source bucket {src_bucket_name} to destination bucket {dst_bucket_name}.")
-        else:
-            st.markdown(f"Object {dst_file_name} already exists in destination bucket {dst_bucket_name}.")
-        flag = 1
-    except:
-        st.error("File not found in NEXRAD Database, Please check the file //////")
-        flag = 0
 
-    # Printing the Information That the File Is Copied.
-    print('Single File is copied')
-#
 def get_dir_from_filename_nexrad(file_name):
   # static_url_12 = "https://noaa-nexrad-level2.s3.amazonaws.com"
 #   lis = file_name.split("_")
     full_file_name = ""
-    try:
-        splitted = file_name.split("_")
-        ground_station = splitted[0:4]
-        year = splitted[0][4:8]
-        month = splitted[0][8:10]
-        day = splitted[0][10:12]
-        full_file_name = year+"/"+month+"/"+day+"/"+ground_station+"/"+file_name
-        # print(full_file_name,"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
-    except:
-        print("exception in nexrad")
+
+    # splitted = file_name.split("_")
+    ground_station = file_name[0:4]
+    year = file_name[4:8]
+    month = file_name[8:10]
+    day = file_name[10:12]
+    full_file_name = year+"/"+month+"/"+day+"/"+ground_station+"/"+file_name
+    # print(full_file_name,"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
     return full_file_name
 
 #
