@@ -73,7 +73,4 @@ def fetch_data_from_table():
 
 
 if __name__ == "__main__":
-    check_database_initilization()
-
-
-
+    # check_database_initilization
