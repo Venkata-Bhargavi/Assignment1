@@ -5,13 +5,13 @@ import json
 import requests
 from streamlit_lottie import st_lottie
 import logging
-
+import folium
 from aws_nexrad import get_files_from_nexrad_bucket, get_noaa_nexrad_url, copy_s3_nexrad_file, get_my_s3_url_nex, get_dir_from_filename_nexrad
 # from aws_nexrad import get_dir_from_filename_nexrad, get_files_from_nexrad_bucket, get_noaa_nexrad_url
 from nex_sql import fetch_data_from_table
 # from aws_geos import get_files_from_noaa_bucket, get_noaa_geos_url, copy_s3_file, get_my_s3_url, \
 #     get_dir_from_filename_geos
-
+from streamlit_folium import folium_static
 path = os.path.dirname(__file__)
 from dotenv import load_dotenv
 
@@ -191,12 +191,21 @@ if button_url:
 
 
 
-DATA_URL = ('nexrad1.csv')
+DATA_URL = ('nexrad.csv')
 @st.cache(persist=True)
 def load_data(nrows):
     data = pd.read_csv(DATA_URL, nrows=nrows)
     # lowercase = lambda x:str(x).lower()
     return data
 data = load_data(10000)
-df = pd.DataFrame({'lat': data['LAT'],'lon':data['LON']})
-st.map(df)
+df = pd.DataFrame({'name': data['NAME'],'lat': data['LAT'],'lon':data['LON']})
+
+m = folium.Map(location=[20,0], tiles="OpenStreetMap", zoom_start=2)
+# st.map(df)
+for i in range(0,len(data)):
+   folium.Marker(
+      location=[df.iloc[i]['lat'], df.iloc[i]['lon']],
+      popup=df.iloc[i]['name'],
+   ).add_to(m)
+# st.markdown()
+folium_static(m)
