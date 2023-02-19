@@ -67,13 +67,15 @@ with year:
     year = st.selectbox('Year', yl)
     # year = st.selectbox('Year', range(2020, 2023))
     selected_year_geos = year
-days_of_selected_year = extract_values_from_df(data_df,"year",selected_year_geos,"day")
+days_of_selected_year = extract_values_from_df(data_df[data_df.year==selected_year_geos],"year",selected_year_geos,"day")
+
 with day:
     dsyl = days_of_selected_year
     dsyl.insert(0, "Select Day")
     day = st.selectbox('Day',dsyl)
     selected_day_geos = day
-hours_of_selected_day = extract_values_from_df(data_df,"day",selected_day_geos,"hour")
+hours_of_selected_day = extract_values_from_df(data_df[(data_df.year==selected_year_geos) & (data_df.day==selected_day_geos)],"day",selected_day_geos,"hour")
+
 with hour:
     hsdl = hours_of_selected_day
     hsdl.insert(0,"Select Hour")

@@ -32,7 +32,6 @@ def extract_values_from_df(df, key, value, col):
     # Return all the values from the specified column
     return filtered_df[col].unique().tolist()
 
-
 def load_lottiefile(filepath:str):
     with open(filepath,"r") as f:
         return json.load(f)
@@ -74,7 +73,7 @@ with year:
     year = st.selectbox('Year', yl)
     # year = st.selectbox('Year', range(2020, 2023))
     selected_year_nexrad = year
-month_of_selected_year = extract_values_from_df(data_df, "year", selected_year_nexrad, "month")
+month_of_selected_year = extract_values_from_df(data_df[data_df.year==selected_year_nexrad], "year", selected_year_nexrad, "month")
 with month:
     msyl = month_of_selected_year
     # msyl = [int(item) for item in msyl]
@@ -83,7 +82,8 @@ with month:
     msyl.insert(0, "Select Month")
     month = st.selectbox('Month', msyl)
     selected_month_nexrad = month
-day_of_selected_month = extract_values_from_df(data_df, "month", selected_month_nexrad, "day")
+day_of_selected_month = extract_values_from_df(data_df[(data_df.year==selected_year_nexrad) & (data_df.month==selected_month_nexrad)], "month", selected_month_nexrad, "day")
+
 with day:
     dsml = day_of_selected_month
     # dsml = [int(item) for item in dsml]
@@ -92,7 +92,8 @@ with day:
     dsml.insert(0, "Select Day")
     day = st.selectbox("Day", dsml)
     selected_day_nexrad = day
-station_code_of_selected_hour = extract_values_from_df(data_df,"day", selected_day_nexrad, "station")
+station_code_of_selected_hour = extract_values_from_df(data_df[(data_df.year==selected_year_nexrad) & (data_df.month==selected_month_nexrad) & (data_df.day==selected_day_nexrad)],"day", selected_day_nexrad, "station")
+
 with station_code:
     scshl = station_code_of_selected_hour
     # scshl = [int(item) for item in scshl]
