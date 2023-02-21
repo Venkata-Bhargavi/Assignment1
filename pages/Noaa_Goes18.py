@@ -159,7 +159,7 @@ if button_url:
                     st.markdown(f"[{text2}]({my_s3_file_url})", unsafe_allow_html=True)
                     logging.info("URL has been generated")
             else:
-                logging.DEBUG("File not found in NOAA database")
+                # logging.DEBUG("File not found in NOAA database")
                 st.error("File not found in NOAA database, Please enter a valid filename!")
 
         else:
